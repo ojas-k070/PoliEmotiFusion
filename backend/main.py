@@ -1,37 +1,60 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
 import time
 import uuid
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-# Robust import handling across different execution contexts (package vs direct module)
+# Robust import handling across different execution contexts
 try:
+    from backend.image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
+    from backend.image_model_service import image_model_service
     from backend.model_service import model_service
-    from backend.schemas import HealthResponse, TextAnalysisRequest, TextAnalysisResponse
+    from backend.schemas import (
+        HealthResponse,
+        ImageAnalysisResponse,
+        TextAnalysisRequest,
+        TextAnalysisResponse,
+    )
 except ImportError:
     try:
+        from .image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
+        from .image_model_service import image_model_service
         from .model_service import model_service
-        from .schemas import HealthResponse, TextAnalysisRequest, TextAnalysisResponse
+        from .schemas import (
+            HealthResponse,
+            ImageAnalysisResponse,
+            TextAnalysisRequest,
+            TextAnalysisResponse,
+        )
     except ImportError:
+        from image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
+        from image_model_service import image_model_service
         from model_service import model_service
-        from schemas import HealthResponse, TextAnalysisRequest, TextAnalysisResponse
+        from schemas import (
+            HealthResponse,
+            ImageAnalysisResponse,
+            TextAnalysisRequest,
+            TextAnalysisResponse,
+        )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load the model and tokenizer once when FastAPI application starts."""
+    """Load text and vision models once when FastAPI application starts."""
     model_service.load_model()
+    image_model_service.load_model()
     yield
 
 
 app = FastAPI(
-    title="Political Text Emotion Analysis Backend",
+    title="Political Emotion Analysis Backend",
     version="1.0.0",
-    description="FastAPI service for political text emotion analysis using Hugging Face Transformers.",
+    description="FastAPI service for multimodal political emotion analysis (Text & Image) using PyTorch & Hugging Face Transformers.",
     lifespan=lifespan,
 )
 
@@ -100,7 +123,7 @@ async def analyze_text(request: TextAnalysisRequest):
     confidence = prediction["confidence"]
     probabilities = prediction["probabilities"]
 
-    # 60-character preview (with '…' if truncated) plus ' — N chars'
+    # 60-character preview (with '…* if truncated) plus ' — N chars'
     preview = f"{stripped_text[:60]}…" if text_len > 60 else stripped_text
     input_label = f"{preview} — {text_len} chars"
 
@@ -108,7 +131,7 @@ async def analyze_text(request: TextAnalysisRequest):
     summary = f"The submitted text is predominantly {dominant_emotion}."
 
     timestamp = datetime.now(timezone.utc).isoformat()
-    analysis_id = f"an-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"
+    analysis_id = f"in-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"
 
     return TextAnalysisResponse(
         id=analysis_id,
@@ -121,6 +144,87 @@ async def analyze_text(request: TextAnalysisRequest):
         model=model_service.model_name,
         inputLabel=input_label,
         summary=summary,
+        demo=False,
+    )
+
+
+@app.post("/api/image/analyze", response_model=ImageAnalysisResponse)
+async def analyze_image(
+    file: UploadFile = File(..., description="Political image file to analyze"),
+    category: str = Form(default="Other", description="Political category"),
+):
+    """
+    Analyze facial and scene emotions in the submitted political image using EfficientNet-B2.
+    Validates image file extension, size (<= 10MB), and readable image data.
+    Returns HTTPException 400 for invalid, unreadable, or oversized images.
+    """
+    filename = file.filename or "uploaded_image.jpg"
+    ext = Path(filename).suffix.lower()
+
+    if ext not in ALLOWED_EXTENSIONS:
+        allowed_str = ", ".join(ALLOWED_EXTENSIONS).upper()
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format '{ext}'. Allowed formats: {allowed_str}.",
+        )
+
+    try:
+        contents = await file.read()
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to read uploaded file: {str(e)}",
+        )
+
+    if not contents:
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded image file is empty.",
+        )
+
+    if len(contents) > MAX_IMAGE_BYTES:
+        max_mb = MAX_IMAGE_BYTES // (1024 * 1024)
+        raise HTTPException(
+            status_code=400,
+            detail=f"File exceeds maximum allowed size of {max_mb} MB.",
+        )
+
+    try:
+        prediction = image_model_service.predict(contents)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred during image emotion analysis: {str(e)}",
+        )
+
+    dominant_emotion = prediction["emotion"]
+    confidence = prediction["confidence"]
+    probabilities = prediction["probabilities"]
+    meta = prediction.get("metadata", {})
+    width = meta.get("width", 0)
+    height = meta.get("height", 0)
+    fmt = meta.get("format", ext.replace(".", "").upper())
+
+    input_label = f"{filename} — {width}x{height} ({fmt})"
+    summary = f"The submitted image is predominantly {dominant_emotion}."
+
+    timestamp = datetime.now(timezone.utc).isoformat()
+    analysis_id = f"an-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"
+
+    return ImageAnalysisResponse(
+        id=analysis_id,
+        modality="image",
+        emotion=dominant_emotion,
+        confidence=confidence,
+        probabilities=probabilities,
+        timestamp=timestamp,
+        category=category if category else "Other",
+        model=image_model_service.model_name,
+        inputLabel=input_label,
+        summary=summary,
+        facesDetected=None,
         demo=False,
     )
 
