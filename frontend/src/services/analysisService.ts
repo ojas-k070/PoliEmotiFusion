@@ -44,6 +44,47 @@ export async function analyzeVideo(_req: FileAnalysisRequest): Promise<AnalysisR
   throw new Error("This analysis module is not available yet.");
 }
 
-export async function analyzeAudio(_req: FileAnalysisRequest): Promise<AnalysisResult> {
-  throw new Error("This analysis module is not available yet.");
+export interface AudioAnalysisRequest {
+  file: File;
+  category: PoliticalCategory;
+}
+
+export async function analyzeAudio(
+  fileOrReq: File | AudioAnalysisRequest,
+  maybeCategory?: PoliticalCategory,
+): Promise<AnalysisResult> {
+  let file: File;
+  let category: PoliticalCategory = "Other";
+
+  if (fileOrReq instanceof File) {
+    file = fileOrReq;
+    category = maybeCategory ?? "Other";
+  } else {
+    file = fileOrReq.file;
+    category = fileOrReq.category ?? "Other";
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("category", category);
+
+  const response = await fetch("http://127.0.0.1:8000/api/audio/analyze", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const detail = data?.detail;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : detail
+          ? JSON.stringify(detail)
+          : "Audio analysis failed.";
+    throw new Error(message);
+  }
+
+  return data as AnalysisResult;
 }
