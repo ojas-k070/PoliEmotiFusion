@@ -1,0 +1,114 @@
+# ==============================
+# Python
+# ==============================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ==============================
+# Virtual Environment
+# ==============================
+
+.venv/
+venv/
+env/
+ENV/
+
+# ==============================
+# Testing / Coverage
+# ==============================
+
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+*.cover
+
+# ==============================
+# IDE / Editor
+# ==============================
+
+.vscode/
+.idea/
+
+# ==============================
+# Environment Variables
+# ==============================
+
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Jupyter
+# ==============================
+
+.ipynb_checkpoints/
+
+# ==============================
+# Logs
+# ==============================
+
+*.log
+logs/
+
+# ==============================
+# Video / Dataset Files
+# ==============================
+
+data/raw/
+data/processed/
+data/videos/
+data/datasets/
+
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.wmv
+*.flv
+
+# ==============================
+# ML Models / Checkpoints
+# ==============================
+
+models/checkpoints/
+models/weights/
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.bin
+models/*.safetensors
+
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# ==============================
+# Hugging Face Cache
+# ==============================
+
+.cache/
+huggingface/
+.cache/huggingface/
+
+# ==============================
+# Generated Outputs
+# ==============================
+
+outputs/
+results/
+reports/generated/
+
+# ==============================
+# Temporary Files
+# ==============================
+
+*.tmp
+*.temp
+*.bak
+.DS_Store
+Thumbs.db
