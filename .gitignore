@@ -1,3 +1,49 @@
+# Python virtual environments
 .dlenv/
+venv/
+.venv/
+env/
+
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Test / tooling cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local video files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+
+# ML model files
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Hugging Face / local model cache
+huggingface/
+.huggingface/
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code local settings
+.vscode/
