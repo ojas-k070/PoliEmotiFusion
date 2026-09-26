@@ -1,4 +1,8 @@
-import type { AnalysisResult, PoliticalCategory } from "@/lib/types";
+import type {
+  AnalysisResult,
+  NonPoliticalImageResult,
+  PoliticalCategory,
+} from "@/lib/types";
 
 export interface TextAnalysisRequest {
   text: string;
@@ -56,7 +60,7 @@ export async function analyzeText(
 }
 
 /**
- * Analyze an image using the EfficientNet-B2 backend API.
+ * Analyze an image using the CLIP political scene-emotion backend API.
  *
  * The backend expects:
  *   file     -> uploaded image
@@ -64,7 +68,7 @@ export async function analyzeText(
  */
 export async function analyzeImage(
   req: FileAnalysisRequest & { file: File },
-): Promise<AnalysisResult> {
+): Promise<AnalysisResult | NonPoliticalImageResult> {
   const formData = new FormData();
 
   formData.append("file", req.file);
@@ -93,7 +97,7 @@ export async function analyzeImage(
     throw new Error(message);
   }
 
-  return data as AnalysisResult;
+  return data as AnalysisResult | NonPoliticalImageResult;
 }
 
 /**

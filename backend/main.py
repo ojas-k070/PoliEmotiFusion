@@ -45,9 +45,8 @@ except ImportError:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load text and vision models once when FastAPI application starts."""
+    """Load the text model at startup; the gated vision model loads on demand."""
     model_service.load_model()
-    image_model_service.load_model()
     yield
 
 
@@ -154,7 +153,7 @@ async def analyze_image(
     category: str = Form(default="Other", description="Political category"),
 ):
     """
-    Analyze facial and scene emotions in the submitted political image using EfficientNet-B2.
+    Score the overall scene emotion in the submitted political image using CLIP.
     Validates image file extension, size (<= 10MB), and readable image data.
     Returns HTTPException 400 for invalid, unreadable, or oversized images.
     """
@@ -193,10 +192,23 @@ async def analyze_image(
         prediction = image_model_service.predict(contents)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"An unexpected error occurred during image emotion analysis: {str(e)}",
+        )
+
+    if prediction.get("status") == "not_political_content":
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "not_political_content",
+                "political_score": prediction.get("political_score"),
+                "threshold": prediction.get("threshold"),
+                "message": prediction.get("message"),
+            },
         )
 
     dominant_emotion = prediction["emotion"]
@@ -208,7 +220,7 @@ async def analyze_image(
     fmt = meta.get("format", ext.replace(".", "").upper())
 
     input_label = f"{filename} — {width}x{height} ({fmt})"
-    summary = f"The submitted image is predominantly {dominant_emotion}."
+    summary = f"The model's top predicted emotion is {dominant_emotion}."
 
     timestamp = datetime.now(timezone.utc).isoformat()
     analysis_id = f"an-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"

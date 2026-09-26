@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 
 import type {
   AnalysisResult,
+  NonPoliticalImageResult,
   PoliticalCategory,
 } from "@/lib/types";
 
@@ -67,6 +68,8 @@ function ImageAnalysisPage() {
 
   const [result, setResult] =
     useState<AnalysisResult | null>(null);
+  const [gateRejection, setGateRejection] =
+    useState<NonPoliticalImageResult | null>(null);
 
   /*
    * Create image preview when a file is selected.
@@ -101,6 +104,7 @@ function ImageAnalysisPage() {
 
     setError(null);
     setResult(null);
+    setGateRejection(null);
     setFile(selected);
   };
 
@@ -111,6 +115,7 @@ function ImageAnalysisPage() {
     setFile(null);
     setError(null);
     setResult(null);
+    setGateRejection(null);
   };
 
   /*
@@ -127,6 +132,7 @@ function ImageAnalysisPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setGateRejection(null);
 
     try {
       const analysis =
@@ -134,6 +140,12 @@ function ImageAnalysisPage() {
           file,
           category,
         });
+
+      if ("status" in analysis) {
+        setGateRejection(analysis);
+        toast.info(analysis.message);
+        return;
+      }
 
       setResult(analysis);
 
@@ -204,9 +216,9 @@ function ImageAnalysisPage() {
         {/* Information message */}
         {!result && (
           <div className="rounded-lg border border-border bg-secondary/40 px-3.5 py-2.5 text-xs text-muted-foreground">
-            Upload a political image and click
-            Analyze Image to run EfficientNet-B2
-            emotion analysis.
+            Upload a political image and click Analyze Image to run the political-content gate and
+            scene emotion scorer. Predictions are experimental and not validated on a curated
+            political-image dataset.
           </div>
         )}
 
@@ -241,6 +253,21 @@ function ImageAnalysisPage() {
 
         </div>
       </Card>
+
+      {gateRejection && (
+        <div
+          role="status"
+          className="rounded-lg border border-border bg-secondary/40 px-4 py-3"
+        >
+          <p className="text-sm font-medium">
+            Political content not detected
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {gateRejection.message} Score: {gateRejection.political_score.toFixed(3)}
+            (threshold {gateRejection.threshold.toFixed(3)}).
+          </p>
+        </div>
+      )}
 
       {/* Analysis result */}
       {result && (
@@ -287,21 +314,26 @@ function ImageResults({
         </div>
       </div>
 
+      <div
+        role="note"
+        className="rounded-lg border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground"
+      >
+        Experimental result: CLIP scene-emotion scores are not validated on a curated
+        political-image dataset. The displayed percentage is a similarity score, not verified
+        accuracy.
+      </div>
+
       {/* Dominant emotion */}
       <div className="rounded-xl border border-border bg-secondary/40 p-5">
 
-        <p className="text-sm text-muted-foreground">
-          Dominant Emotion
-        </p>
+        <p className="text-sm text-muted-foreground">Top Predicted Emotion</p>
 
         <div className="mt-1 flex items-baseline gap-3">
 
-          <h3 className="text-3xl font-bold">
-            {result.emotion}
-          </h3>
+          <h3 className="text-3xl font-bold">{result.emotion}</h3>
 
           <span className="text-lg font-semibold text-muted-foreground">
-            {Number(result.confidence).toFixed(1)}%
+            {Number(result.confidence).toFixed(1)}% model score
           </span>
 
         </div>
@@ -317,9 +349,7 @@ function ImageResults({
       {/* Probability distribution */}
       <div>
 
-        <h3 className="mb-4 text-base font-semibold">
-          Emotion Probability Distribution
-        </h3>
+        <h3 className="mb-4 text-base font-semibold">Emotion Score Distribution</h3>
 
         <div className="space-y-4">
 

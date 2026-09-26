@@ -34,10 +34,10 @@ class ImageAnalysisResponse(BaseModel):
     id: str = Field(..., description="Unique analysis identifier")
     modality: Literal["image"] = Field(default="image", description="Input modality, always 'image'")
     emotion: str = Field(..., description="Dominant detected emotion label")
-    confidence: float = Field(..., description="Confidence percentage for dominant emotion (0.0 to 100.0)")
+    confidence: float = Field(..., description="Normalized model score for the top emotion label (0.0 to 100.0)")
     probabilities: Dict[str, float] = Field(
         ...,
-        description="Emotion probability distribution percentages for all classes, totaling 100",
+        description="Normalized CLIP similarity score percentages across all emotion labels, totaling 100; not calibrated probabilities",
     )
     timestamp: str = Field(..., description="ISO 8601 formatted timestamp")
     category: str = Field(..., description="Category context associated with the input")

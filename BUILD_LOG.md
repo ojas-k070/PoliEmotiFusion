@@ -1,0 +1,63 @@
+- 2026-09-26T00:00:00Z: Project initialized; image emotion pipeline exists with EfficientNet-B2 and no political-domain gate.
+- 2026-09-26T00:00:00Z: Added CLIP zero-shot political-domain gate to backend/image_model_service.py and returned a non-political status before emotion inference.
+- 2026-09-26T00:00:00Z: Added political fine-tuning script at train_political_image_model.py using a ViT checkpoint, class-weighted loss, 80/20 split, and early stopping.
+- 2026-09-26T06:26:29Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:30:02Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:41:58Z: Political model training script launched.
+- 2026-09-26T06:41:58Z: Political dataset prep started for data/political_emotion.
+- 2026-09-26T06:41:58Z: Dataset split created: 72 train images and 19 validation images across 7 labels.
+- 2026-09-26T06:41:59Z: Training label order detected: ['Anger', 'Disgust', 'Fear', 'Joy', 'Neutral', 'Sadness', 'Surprise'].
+- 2026-09-26T06:42:47Z: Epoch 1/1: train_loss=2.5915, train_acc=0.2778, val_loss=2.3461, val_acc=0.3158, elapsed=3.8s.
+- 2026-09-26T06:42:47Z: Best checkpoint saved to models/image/political_emotion_vit_best.pth at epoch 1.
+- 2026-09-26T06:46:45Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:47:19Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:47:20Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-0/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T06:49:42Z: Political ViT emotion model loaded from /home/parth_kahane/PoliEmotiFusion/models/image/political_emotion_vit_best.pth.
+- 2026-09-26T06:50:12Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:50:12Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-1/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T06:50:47Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T06:50:47Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-2/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T06:56:16Z: CLIP domain gate loaded for political/non-political filtering.
+- 2026-09-26T06:56:18Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.3000, passed=False.
+- 2026-09-26T06:56:18Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T07:00:16Z: CLIP domain gate loaded for political/non-political filtering.
+- 2026-09-26T07:00:15Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.3000, passed=False.
+- 2026-09-26T07:00:15Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T07:01:29Z: Domain gate result: positive=0.2272, negative=0.1846, threshold=0.3000, passed=False.
+- 2026-09-26T07:01:29Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T07:03:09Z: CLIP domain gate loaded for political/non-political filtering.
+- 2026-09-26T07:03:10Z: Domain gate result: positive=0.2272, negative=0.1846, threshold=0.3000, passed=False.
+- 2026-09-26T07:03:10Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T07:04:50Z: CLIP domain gate loaded for political/non-political filtering.
+- 2026-09-26T07:04:51Z: Domain gate result: positive=0.2272, negative=0.1846, threshold=0.2000, passed=True.
+- 2026-09-26T07:05:03Z: Political ViT emotion model loaded from /home/parth_kahane/PoliEmotiFusion/models/image/political_emotion_vit_best.pth.
+- 2026-09-26T07:05:47Z: Domain gate result: positive=0.2206, negative=0.1890, threshold=0.2000, passed=True.
+- 2026-09-26T07:06:29Z: Domain gate result: positive=0.2149, negative=0.1866, threshold=0.2000, passed=True.
+- 2026-09-26T07:07:12Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.2000, passed=True.
+- 2026-09-26T07:07:45Z: Domain gate result: positive=0.2070, negative=0.2144, threshold=0.2000, passed=True.
+- 2026-09-26T07:10:21Z: Domain gate result: positive=0.2206, negative=0.1890, threshold=0.2000, passed=True.
+- 2026-09-26T07:10:38Z: Domain gate result: positive=0.1328, negative=0.1613, threshold=0.2000, passed=False.
+- 2026-09-26T07:10:38Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T07:11:06Z: Domain gate result: positive=0.2206, negative=0.1890, threshold=0.2000, passed=True.
+- 2026-09-26T07:12:01Z: Domain gate result: positive=0.2277, negative=0.2007, threshold=0.2000, passed=True.
+- 2026-09-26T14:22:50Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T14:22:52Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-0/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T14:25:08Z: Political ViT emotion model loaded from /home/parth_kahane/PoliEmotiFusion/models/image/political_emotion_vit_best.pth.
+- 2026-09-26T14:27:31Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T14:27:33Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-1/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T14:47:51Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T14:47:52Z: Political ViT emotion model loaded from /tmp/pytest-of-parth_kahane/pytest-2/test_load_model_reads_checkpoi0/political.pth.
+- 2026-09-26T14:53:32Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T14:54:31Z: CLIP image-text model loaded for political filtering and scene emotion scoring.
+- 2026-09-26T14:55:49Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T14:59:21Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T15:01:40Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T15:03:39Z: Emotion classification skipped because the image did not pass the political-content gate.
+- 2026-09-26T15:03:45Z: CLIP image-text model loaded for political filtering and scene emotion scoring.
+- 2026-09-26T15:09:35Z: CLIP image-text model loaded for political filtering and scene emotion scoring.
+- 2026-09-26T15:09:36Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.2000, passed=True.
+- 2026-09-26T15:09:52Z: Domain gate result: positive=0.2149, negative=0.1866, threshold=0.2000, passed=True.
+- 2026-09-26T15:10:15Z: Domain gate result: positive=0.2277, negative=0.2007, threshold=0.2000, passed=True.
+- 2026-09-26T15:10:33Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.2000, passed=True.
+- 2026-09-26T15:12:19Z: Domain gate result: positive=0.2227, negative=0.1674, threshold=0.2000, passed=True.
+- 2026-09-26T15:12:41Z: Domain gate result: positive=0.2227, negative=0.1674, threshold=0.2000, passed=True.

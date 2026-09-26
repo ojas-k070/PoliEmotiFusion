@@ -28,8 +28,11 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 
 # Model naming and paths
 MODEL_IDENTIFIER: str = "EfficientNet-B2 Emotion Classifier"
+POLITICAL_MODEL_IDENTIFIER: str = "CLIP Zero-Shot Political Scene Emotion"
+POLITICAL_BASE_MODEL: str = "trpakov/vit-face-expression"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CHECKPOINT_PATH = PROJECT_ROOT / "models" / "image" / "efficientnet_b2_emotion.pth"
+POLITICAL_CHECKPOINT_PATH = PROJECT_ROOT / "models" / "image" / "political_emotion_vit_best.pth"
 DATA_DIR = PROJECT_ROOT / "data" / "image_emotion"
 
 # File upload restrictions
