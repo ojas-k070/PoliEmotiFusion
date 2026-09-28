@@ -70,33 +70,54 @@ POLITICAL_NEGATIVE_PROMPTS: List[str] = [
 ]
 POLITICAL_EMOTION_PROMPTS: Dict[str, List[str]] = {
     "Anger": [
-        "a political image with an angry, confrontational atmosphere",
-        "a political protest image conveying outrage and conflict",
+        "a political photograph of a person with an angry facial expression",
+        "a political person visibly angry, furious, or enraged",
+        "a political image showing anger, frustration, or hostility",
+        "a person in a political setting looking visibly angry",
     ],
+
     "Joy": [
-        "a political image with a joyful, hopeful, celebratory atmosphere",
-        "a political rally scene conveying optimism and unity",
+        "a political photograph of a person smiling happily",
+        "a political person with a clearly joyful and happy facial expression",
+        "a political image showing a person smiling with genuine happiness",
+        "a person in a political setting looking cheerful, pleased, or delighted",
     ],
+
     "Sadness": [
-        "a solemn political image conveying grief, loss, or sorrow",
-        "a political scene with a visibly mournful and somber atmosphere",
+        "a political photograph of a person with a sad facial expression",
+        "a political person looking visibly sad, sorrowful, or unhappy",
+        "a political image showing a person experiencing sadness or grief",
+        "a person in a political setting looking mournful or emotionally distressed",
     ],
+
     "Fear": [
-        "a political image conveying fear, threat, or public insecurity",
-        "a tense political scene conveying anxiety and danger",
+        "a political photograph of a person with a fearful facial expression",
+        "a political person looking scared, frightened, or anxious",
+        "a political image showing visible fear or nervousness",
+        "a person in a political setting appearing afraid or worried",
     ],
+
     "Surprise": [
-        "a political image capturing shock or unexpected news",
-        "a political scene conveying astonishment and disbelief",
+        "a political photograph of a person with a surprised facial expression",
+        "a political person looking shocked or astonished",
+        "a political image showing visible surprise or disbelief",
+        "a person in a political setting reacting with surprise",
     ],
+
     "Disgust": [
-        "a political image conveying revulsion or strong disapproval",
-        "a political scene with an atmosphere of moral disgust",
+        "a political photograph of a person with a disgusted facial expression",
+        "a political person visibly disgusted or repulsed",
+        "a political image showing a person expressing disgust",
+        "a person in a political setting looking visibly disgusted",
     ],
+
     "Neutral": [
-        "a neutral factual political news photograph without a strong emotion",
-        "an ordinary political meeting with a calm, neutral atmosphere",
+        "a political photograph of a person with a neutral facial expression",
+        "a political person with a calm, expressionless face",
+        "a political image showing a person without a strong emotional expression",
+        "a person in a political setting looking calm and emotionally neutral",
     ],
+
 }
 
 
@@ -140,7 +161,7 @@ class ImageEmotionModelService:
         self,
         checkpoint_path: Optional[Union[str, Path]] = None,
         model_name: str = MODEL_IDENTIFIER,
-        gate_threshold: float = 0.20
+        gate_threshold: float = 0.18
     ) -> None:
         self.checkpoint_path = Path(checkpoint_path) if checkpoint_path else DEFAULT_CHECKPOINT_PATH
         self.model_name = model_name
@@ -323,7 +344,7 @@ class PoliticalImageEmotionModelService(ImageEmotionModelService):
 
     def __init__(
         self,
-        gate_threshold: float = 0.20,
+        gate_threshold: float = 0.18,
     ) -> None:
         super().__init__(
             model_name=POLITICAL_MODEL_IDENTIFIER,
