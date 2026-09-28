@@ -1,4 +1,5 @@
 from typing import Dict, List, Literal, Any
+from typing import Dict, Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -29,7 +30,6 @@ class TextAnalysisResponse(BaseModel):
     summary: str = Field(..., description="Predominant emotion summary string")
     demo: bool = Field(default=False, description="Flag indicating if result is demo data (always false)")
 
-
 class SpeechIntelligenceResponse(BaseModel):
     id: str = Field(..., description="Unique speech analysis identifier")
     modality: Literal["audio", "speech"] = Field(default="audio", description="Input modality")
@@ -52,6 +52,23 @@ class SpeechIntelligenceResponse(BaseModel):
     model: str = Field(default="openai/whisper-small", description="Whisper model used")
     processingTime: float = Field(default=0.0, description="Processing time in seconds")
 
+
+class ImageAnalysisResponse(BaseModel):
+    id: str = Field(..., description="Unique analysis identifier")
+    modality: Literal["image"] = Field(default="image", description="Input modality, always 'image'")
+    emotion: str = Field(..., description="Dominant detected emotion label")
+    confidence: float = Field(..., description="Normalized model score for the top emotion label (0.0 to 100.0)")
+    probabilities: Dict[str, float] = Field(
+        ...,
+        description="Normalized CLIP similarity score percentages across all emotion labels, totaling 100; not calibrated probabilities",
+    )
+    timestamp: str = Field(..., description="ISO 8601 formatted timestamp")
+    category: str = Field(..., description="Category context associated with the input")
+    model: str = Field(..., description="Model identifier used for analysis")
+    inputLabel: str = Field(..., description="Image filename with dimensions")
+    summary: str = Field(..., description="Predominant emotion summary string")
+    facesDetected: Optional[int] = Field(default=None, description="Number of detected faces if face detection is enabled")
+    demo: bool = Field(default=False, description="Flag indicating if result is demo data (always false)")
 
 class HealthResponse(BaseModel):
     status: str = Field(default="ok", description="Server health status")

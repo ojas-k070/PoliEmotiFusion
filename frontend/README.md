@@ -20,7 +20,7 @@ A deep learning multimodal emotion analysis platform designed for political disc
 ## 🌟 Features
 
 - **Text Emotion Analysis (`/text`)**: Evaluates political statements, speeches, and social commentary using transformer architectures (BERT / RoBERTa).
-- **Image Facial & Scene Emotion (`/image`)**: Detects facial expressions, micro-expressions, and visual sentiment using CNN / ViT vision pipelines.
+- **Image Scene Emotion (`/image`)**: Uses CLIP zero-shot similarity to score the overall emotion conveyed by a political image; scores are experimental and not calibrated accuracy.
 - **Audio / Speech Emotion (`/audio`)**: Analyzes acoustic features, pitch, and vocal cadence using Wav2Vec2 / Audio Spectrogram Transformers.
 - **Video Temporal Emotion (`/video`)**: Real-time temporal emotion tracking over video timelines using 3D CNNs and SlowFast networks.
 - **Interactive Dashboard (`/`)**: Comprehensive overview of emotion telemetry, activity feeds, and model latency metrics.
@@ -124,7 +124,7 @@ In the `frontend` directory, you can run:
 | :--- | :--- | :--- |
 | `/` | **Dashboard** | Overview of modalities, quick stats, and recent emotion trends |
 | `/text` | **Text Analyzer** | Input political text or speech transcripts for emotion breakdown |
-| `/image` | **Image Analyzer** | Upload political photos/portraits for facial emotion recognition |
+| `/image` | **Image Analyzer** | Upload political images for whole-scene emotion scoring |
 | `/audio` | **Audio Analyzer** | Upload speech audio files with waveform visualization |
 | `/video` | **Video Analyzer** | Upload video clips for frame-by-frame temporal emotion tracking |
 | `/insights` | **Insights & Trends** | Aggregate charts, emotion radars, and model performance metrics |

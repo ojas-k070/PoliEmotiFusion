@@ -196,3 +196,9 @@ try {
 The backend is configured to accept cross-origin requests from:
 - `http://localhost:5173` (Vite dev server default)
 - `http://localhost:8080` (Alternative local frontend port)
+
+## Political Image Analysis
+
+Image requests first pass through a lazy-loaded CLIP political-content gate. Rejected images return HTTP 200 with `status: "not_political_content"`. Accepted images are scored against whole-scene emotion descriptions using the same CLIP model; this path does not require a fine-tuned image checkpoint. The response percentages are zero-shot similarity scores normalized across the seven labels, not calibrated probabilities or measured accuracy.
+
+The existing `train_political_image_model.py` script fine-tunes a face-expression ViT and is not used by the active scene-emotion endpoint. Its local smoke checkpoint was trained for one epoch on 91 generic images and reached 31.58% validation accuracy on 19 samples; those images are not verified political scenes. For reliable scene-emotion performance, use a politically curated dataset labeled for the overall image and evaluate it on a separate held-out political test set.

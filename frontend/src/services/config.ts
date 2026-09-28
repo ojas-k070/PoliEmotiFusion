@@ -9,7 +9,7 @@ export const MODEL_LABELS: Record<Modality, string> = {
 
 export const LOADING_MESSAGES: Record<Modality, string[]> = {
   text: ["Validating input...", "Processing text...", "Scoring emotion classes..."],
-  image: ["Reading image...", "Detecting facial features...", "Scoring emotion classes..."],
+  image: ["Reading image...", "Checking political context...", "Scoring scene emotion..."],
   video: ["Sampling frames...", "Processing video frames...", "Building emotion timeline..."],
   audio: ["Decoding audio...", "Analyzing speech characteristics...", "Scoring emotion classes..."],
 };
