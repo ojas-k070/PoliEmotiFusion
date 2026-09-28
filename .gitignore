@@ -1,3 +1,4 @@
 .dlenv/
 __pycache__/
 *.pyc
+backend/venv/

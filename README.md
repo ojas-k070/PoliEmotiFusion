@@ -53,7 +53,7 @@ The Text Analysis module allows users to enter political speeches, debate statem
 
 ### 3. Image Analysis
 
-The Image Analysis module provides an interface for uploading political images and analyzing their emotional characteristics. The frontend interface is currently available, while the complete image-analysis pipeline is planned for a future development stage.
+The Image Analysis module accepts political images, applies a political-content gate, and scores the overall scene against emotion descriptions using CLIP. These zero-shot scores are experimental, not verified accuracy. Reliable political-scene predictions require a curated, emotion-labeled political image dataset and held-out evaluation.
 
 ![Political Image Analysis](frontend/public/screenshots/image-analysis.png)
 

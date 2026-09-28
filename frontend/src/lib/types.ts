@@ -50,6 +50,13 @@ export interface AnalysisResult {
   waveform?: number[] | undefined;
 }
 
+export interface NonPoliticalImageResult {
+  status: "not_political_content";
+  political_score: number;
+  threshold: number;
+  message: string;
+}
+
 export interface HistoryRecord {
   id: string;
   date: string;
