@@ -16,19 +16,17 @@ backend_dir = str(Path(__file__).resolve().parent)
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-# Robust import handling across different execution contexts (package vs direct module)
+# Robust import handling across different execution contexts
 try:
     from backend.image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
     from backend.image_model_service import image_model_service
     from backend.model_service import model_service
+    from backend.political_service import political_service
     from backend.speech_intelligence import speech_pipeline
     from backend.schemas import (
         HealthResponse,
-        SpeechIntelligenceResponse,
-    from backend.political_service import political_service
-    from backend.schemas import (
-        HealthResponse,
         ImageAnalysisResponse,
+        SpeechIntelligenceResponse,
         TextAnalysisRequest,
         TextAnalysisResponse,
     )
@@ -37,14 +35,12 @@ except ImportError:
         from .image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
         from .image_model_service import image_model_service
         from .model_service import model_service
+        from .political_service import political_service
         from .speech_intelligence import speech_pipeline
         from .schemas import (
             HealthResponse,
-            SpeechIntelligenceResponse,
-        from .political_service import political_service
-        from .schemas import (
-            HealthResponse,
             ImageAnalysisResponse,
+            SpeechIntelligenceResponse,
             TextAnalysisRequest,
             TextAnalysisResponse,
         )
@@ -52,18 +48,15 @@ except ImportError:
         from image_config import ALLOWED_EXTENSIONS, MAX_IMAGE_BYTES
         from image_model_service import image_model_service
         from model_service import model_service
+        from political_service import political_service
         from speech_intelligence import speech_pipeline
         from schemas import (
             HealthResponse,
-            SpeechIntelligenceResponse,
-        from political_service import political_service
-        from schemas import (
-            HealthResponse,
             ImageAnalysisResponse,
+            SpeechIntelligenceResponse,
             TextAnalysisRequest,
             TextAnalysisResponse,
         )
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -371,7 +364,7 @@ async def analyze_speech(
         inputLabel=input_label,
         model=result["model"],
         processingTime=result["processingTime"],
-
+    )
 @app.post("/api/image/analyze", response_model=ImageAnalysisResponse)
 async def analyze_image(
     file: UploadFile = File(

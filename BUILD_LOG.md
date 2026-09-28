@@ -61,3 +61,5 @@
 - 2026-09-26T15:10:33Z: Domain gate result: positive=0.2414, negative=0.1735, threshold=0.2000, passed=True.
 - 2026-09-26T15:12:19Z: Domain gate result: positive=0.2227, negative=0.1674, threshold=0.2000, passed=True.
 - 2026-09-26T15:12:41Z: Domain gate result: positive=0.2227, negative=0.1674, threshold=0.2000, passed=True.
+- 2026-09-28T19:15:13Z: CLIP image-text model loaded for political filtering and scene emotion scoring.
+- 2026-09-28T19:15:15Z: Domain gate result: positive=0.2171, negative=0.1854, threshold=0.1800, passed=True.
