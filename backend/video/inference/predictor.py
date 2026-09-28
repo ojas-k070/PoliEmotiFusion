@@ -61,6 +61,12 @@ class VideoPredictor:
     ) -> VideoAnalysisResult:
         """Run the complete video emotion pipeline."""
 
+        # TEMPORARY DEBUG MARKER — remove once confirmed in server logs.
+        # If this line does not appear in your terminal when you hit
+        # /api/video/analyze, the server is NOT running this file, and
+        # you need to fix the deployment/restart before anything else.
+        print(">>> PATCHED PREDICTOR IS RUNNING <<<", flush=True)
+
         if self.model is None:
             return VideoAnalysisResult(
                 modality="video",
@@ -88,6 +94,14 @@ class VideoPredictor:
                 or "Video could not be processed."
             )
 
+        # NOTE: normalize and color conversion are intentionally disabled
+        # here. VideoMAEAdapter._prepare_frame() (the model adapter) expects
+        # raw BGR uint8 frames and performs its own BGR->RGB conversion and
+        # normalization internally. Doing the conversion/normalization here
+        # AND in the adapter double-flips the color channels (RGB->"RGB"
+        # gets flipped back to BGR by the adapter), which was silently
+        # feeding color-swapped frames into the model. Only sampling,
+        # face-crop, and resize should happen in this call.
         frames = preprocess_video_frames(
             path,
             sample_rate=self.sample_rate,
@@ -95,7 +109,8 @@ class VideoPredictor:
             max_duration_seconds=self.max_duration_seconds,
             target_resolution=self.target_resolution,
             start_time_seconds=self.start_time_seconds,
-            normalize=self.normalize,
+            normalize=False,
+            convert_bgr_to_rgb=False,
         )
 
         effective_duration = self._get_effective_duration(
