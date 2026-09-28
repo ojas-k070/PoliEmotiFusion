@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,30 +18,30 @@ if backend_dir not in sys.path:
 
 # Robust import handling across different execution contexts (package vs direct module)
 try:
-    from backend.audio_model_service import audio_model_service
     from backend.model_service import model_service
+    from backend.speech_intelligence import speech_pipeline
     from backend.schemas import (
-        AudioAnalysisResponse,
         HealthResponse,
+        SpeechIntelligenceResponse,
         TextAnalysisRequest,
         TextAnalysisResponse,
     )
 except ImportError:
     try:
-        from .audio_model_service import audio_model_service
         from .model_service import model_service
+        from .speech_intelligence import speech_pipeline
         from .schemas import (
-            AudioAnalysisResponse,
             HealthResponse,
+            SpeechIntelligenceResponse,
             TextAnalysisRequest,
             TextAnalysisResponse,
         )
     except ImportError:
-        from audio_model_service import audio_model_service
         from model_service import model_service
+        from speech_intelligence import speech_pipeline
         from schemas import (
-            AudioAnalysisResponse,
             HealthResponse,
+            SpeechIntelligenceResponse,
             TextAnalysisRequest,
             TextAnalysisResponse,
         )
@@ -48,9 +49,9 @@ except ImportError:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load models once when FastAPI application starts."""
-    model_service.load_model()
-    audio_model_service.load_model()
+    """Load models asynchronously in background threads so server starts instantly."""
+    asyncio.create_task(asyncio.to_thread(model_service.load_model))
+    asyncio.create_task(asyncio.to_thread(speech_pipeline.load_model))
     yield
 
 
@@ -61,13 +62,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Enable CORS for frontend applications
+# Enable CORS for frontend applications (supports Vite, TanStack Start, Next, local dev)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
         "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
         "http://localhost:8080",
+        "http://127.0.0.1:8080",
     ],
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -102,8 +110,14 @@ async def root():
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check endpoint returning server status."""
-    return {"status": "ok"}
+    """Health check endpoint returning server and model readiness status."""
+    return {
+        "status": "ok",
+        "models": {
+            "text": model_service.is_loaded(),
+            "speech_intelligence": speech_pipeline.is_loaded(),
+        },
+    }
 
 
 @app.post("/api/text/analyze", response_model=TextAnalysisResponse)
@@ -132,15 +146,15 @@ async def analyze_text(request: TextAnalysisRequest):
             ),
         )
 
-    # Inference with preloaded model
-    prediction = model_service.predict(stripped_text)
+    # Inference with preloaded model (run in thread pool to not block event loop)
+    prediction = await asyncio.to_thread(model_service.predict, stripped_text)
     dominant_emotion = prediction["emotion"]
     confidence = prediction["confidence"]
     probabilities = prediction["probabilities"]
 
-    # 60-character preview (with '…' if truncated) plus ' — N chars'
-    preview = f"{stripped_text[:60]}…" if text_len > 60 else stripped_text
-    input_label = f"{preview} — {text_len} chars"
+    # 60-character preview (with '...' if truncated) plus ' - N chars'
+    preview = f"{stripped_text[:60]}..." if text_len > 60 else stripped_text
+    input_label = f"{preview} - {text_len} chars"
 
     # Required summary format
     summary = f"The submitted text is predominantly {dominant_emotion}."
@@ -172,24 +186,26 @@ def _format_bytes(size: int) -> str:
     return f"{size / (1024 * 1024):.1f} MB"
 
 
-@app.post("/api/audio/analyze", response_model=AudioAnalysisResponse)
-async def analyze_audio(
+@app.post("/api/audio/analyze", response_model=SpeechIntelligenceResponse)
+@app.post("/api/speech/analyze", response_model=SpeechIntelligenceResponse)
+async def analyze_speech(
     file: UploadFile = File(...),
     category: str = Form("Other"),
 ):
     """
-    Analyze speech emotion from an uploaded audio file.
-    Validates audio format (wav, mp3, m4a, flac), size (<= 50MB), and duration (<= 900s).
-    Returns HTTP 400 for invalid files.
+    Multilingual Political Speech Intelligence & Translation.
+    Transcribes spoken audio in original language (Hindi, English, Marathi, Hinglish, etc.)
+    and produces fluent English translations preserving rhetorical meaning, context, and intent.
+    Zero emotion predictions or sentiment classifications are performed.
     """
     filename = file.filename or "audio_recording"
     ext = filename.split(".")[-1].lower() if "." in filename else ""
-    allowed_extensions = {"wav", "mp3", "m4a", "flac"}
+    allowed_extensions = {"wav", "mp3", "m4a", "flac", "ogg"}
 
     if ext not in allowed_extensions:
         raise HTTPException(
             status_code=400,
-            detail=f"Unsupported format '.{ext}'. Supported formats: WAV, MP3, M4A, FLAC.",
+            detail=f"Unsupported format '.{ext}'. Supported formats: WAV, MP3, M4A, FLAC, OGG.",
         )
 
     # Read uploaded file bytes
@@ -202,11 +218,11 @@ async def analyze_audio(
         )
 
     file_size = len(content)
-    max_size = 50 * 1024 * 1024  # 50 MB
+    max_size = 100 * 1024 * 1024  # 100 MB
     if file_size > max_size:
         raise HTTPException(
             status_code=400,
-            detail=f"File is too large ({_format_bytes(file_size)}). Maximum size is 50 MB.",
+            detail=f"File is too large ({_format_bytes(file_size)}). Maximum size is 100 MB.",
         )
 
     if file_size < 100:
@@ -215,52 +231,52 @@ async def analyze_audio(
             detail="Uploaded file is empty or corrupted.",
         )
 
-    # Perform prediction and feature extraction
+    # Execute speech intelligence pipeline in worker thread
     try:
-        prediction = audio_model_service.predict(content)
+        result = await asyncio.to_thread(
+            speech_pipeline.process,
+            content,
+            filename=filename,
+            file_size_formatted=_format_bytes(file_size),
+            category=category,
+        )
+    except ValueError as val_err:
+        raise HTTPException(
+            status_code=400,
+            detail=str(val_err),
+        )
     except Exception as proc_err:
         raise HTTPException(
-            status_code=400,
-            detail=f"Audio processing error: {str(proc_err)}",
+            status_code=500,
+            detail=f"Speech intelligence processing error: {str(proc_err)}",
         )
 
-    duration = prediction["duration"]
-    if duration > 900.0:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Recording is too long ({round(duration)}s). Maximum supported duration is 15 minutes.",
-        )
-
-    if duration < 0.3:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Recording is too short ({duration:.2f}s). Please provide at least 0.5 seconds of audio.",
-        )
-
-    dominant_emotion = prediction["emotion"]
-    confidence = prediction["confidence"]
-    probabilities = prediction["probabilities"]
-    waveform = prediction.get("waveform", [])
-
-    input_label = f"{filename} — {duration:.1f}s ({_format_bytes(file_size)})"
-    summary = f"The submitted audio is predominantly {dominant_emotion}."
     timestamp = datetime.now(timezone.utc).isoformat()
-    analysis_id = f"an-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"
+    analysis_id = f"sp-{int(time.time() * 1000)}-{uuid.uuid4().hex[:6]}"
+    duration = result["duration"]
+    input_label = f"{filename} - {duration:.1f}s ({_format_bytes(file_size)})"
 
-    return AudioAnalysisResponse(
+    return SpeechIntelligenceResponse(
         id=analysis_id,
         modality="audio",
-        emotion=dominant_emotion,
-        confidence=confidence,
-        probabilities=probabilities,
+        status="completed",
+        language=result["language"],
+        languageName=result["languageName"],
+        languageConfidence=result["languageConfidence"],
+        transcript=result["transcript"],
+        translation=result["translation"],
+        isTranslationNeeded=result["isTranslationNeeded"],
+        duration=duration,
+        formattedDuration=result["formattedDuration"],
+        chunkCount=result["chunkCount"],
+        chunks=result["chunks"],
+        audioStats=result["audioStats"],
+        waveform=result["waveform"],
         timestamp=timestamp,
         category=category if category else "Other",
-        model=audio_model_service.model_name,
         inputLabel=input_label,
-        summary=summary,
-        duration=duration,
-        waveform=waveform,
-        demo=False,
+        model=result["model"],
+        processingTime=result["processingTime"],
     )
 
 

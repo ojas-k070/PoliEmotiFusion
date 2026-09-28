@@ -1,3 +1,4 @@
+import threading
 from typing import Any, Dict
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -32,10 +33,19 @@ class EmotionModelService:
         self.tokenizer = None
         self.model = None
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self._lock = threading.Lock()
+
+    def is_loaded(self) -> bool:
+        """Check if tokenizer and model are successfully loaded into memory."""
+        return self.tokenizer is not None and self.model is not None
 
     def load_model(self) -> None:
-        """Load tokenizer and model onto target device."""
-        if self.tokenizer is None or self.model is None:
+        """Load tokenizer and model onto target device safely."""
+        if self.is_loaded():
+            return
+        with self._lock:
+            if self.is_loaded():
+                return
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
             self.model.to(self.device)

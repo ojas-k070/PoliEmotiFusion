@@ -48,6 +48,61 @@ export interface AnalysisResult {
   duration?: number | undefined;
   /** audio only */
   waveform?: number[] | undefined;
+  /** audio speech intelligence & transcription */
+  transcript?: string | undefined;
+  translation?: string | undefined;
+  language?: string | undefined;
+  languageName?: string | undefined;
+  topEmotions?: { emotion: Emotion; confidence: number }[] | undefined;
+  audioStats?: {
+    duration?: number;
+    sampleRate?: number;
+    channels?: number;
+    channelDesc?: string;
+    format?: string;
+    fileSize?: string;
+  } | undefined;
+  serModel?: string | undefined;
+  transcriptionModel?: string | undefined;
+}
+
+export interface SpeechIntelligenceResult {
+  id: string;
+  modality: "audio" | "speech";
+  status: string;
+  language: string;
+  languageName: string;
+  languageConfidence: number;
+  transcript: string;
+  translation: string;
+  isTranslationNeeded: boolean;
+  duration: number;
+  formattedDuration: string;
+  chunkCount: number;
+  chunks?: {
+    index: number;
+    startTime: number;
+    endTime: number;
+    duration: number;
+    text: string;
+  }[];
+  audioStats?: {
+    duration?: number;
+    processedDuration?: number;
+    sampleRate?: number;
+    targetSampleRate?: number;
+    channels?: number;
+    channelDesc?: string;
+    format?: string;
+    fileSize?: string;
+    chunkCount?: number;
+  };
+  waveform?: number[];
+  timestamp: string;
+  category: PoliticalCategory;
+  inputLabel: string;
+  model: string;
+  processingTime?: number;
 }
 
 export interface HistoryRecord {

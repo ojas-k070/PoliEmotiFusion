@@ -23,7 +23,7 @@ const NAV = [
   { to: "/text", label: "Text Analysis", icon: FileText },
   { to: "/image", label: "Image Analysis", icon: ImageIcon },
   { to: "/video", label: "Video Analysis", icon: Video },
-  { to: "/audio", label: "Audio Analysis", icon: Mic },
+  { to: "/audio", label: "Speech Intelligence", icon: Mic },
   { to: "/history", label: "Analysis History", icon: History },
   { to: "/insights", label: "Insights", icon: BarChart3 },
   { to: "/architecture", label: "Architecture", icon: Network },

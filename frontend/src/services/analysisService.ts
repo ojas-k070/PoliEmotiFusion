@@ -1,4 +1,4 @@
-import type { AnalysisResult, PoliticalCategory } from "@/lib/types";
+import type { AnalysisResult, PoliticalCategory, SpeechIntelligenceResult } from "@/lib/types";
 
 export interface TextAnalysisRequest {
   text: string;
@@ -44,15 +44,15 @@ export async function analyzeVideo(_req: FileAnalysisRequest): Promise<AnalysisR
   throw new Error("This analysis module is not available yet.");
 }
 
-export interface AudioAnalysisRequest {
+export interface SpeechAnalysisRequest {
   file: File;
   category: PoliticalCategory;
 }
 
-export async function analyzeAudio(
-  fileOrReq: File | AudioAnalysisRequest,
+export async function analyzeSpeech(
+  fileOrReq: File | SpeechAnalysisRequest,
   maybeCategory?: PoliticalCategory,
-): Promise<AnalysisResult> {
+): Promise<SpeechIntelligenceResult> {
   let file: File;
   let category: PoliticalCategory = "Other";
 
@@ -82,9 +82,12 @@ export async function analyzeAudio(
         ? detail
         : detail
           ? JSON.stringify(detail)
-          : "Audio analysis failed.";
+          : "Speech intelligence processing failed.";
     throw new Error(message);
   }
 
-  return data as AnalysisResult;
+  return data as SpeechIntelligenceResult;
 }
+
+/** Backward-compatible alias for existing callers */
+export const analyzeAudio = analyzeSpeech;
